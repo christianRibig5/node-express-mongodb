@@ -1,14 +1,15 @@
+const auth = require('../middleware/auth');
 const {Course, validate}=require('../models/course');
 const mongoose=require('mongoose');
 const express =require('express');
 const router=express.Router();
 
-router.get('/',async(req,res)=>{
+router.get('/', async(req,res)=>{
     const courses=await Course.find().sort('name');
     res.send(courses);
 });
 
-router.post('/',async(req,res)=>{
+router.post('/', auth, async(req,res)=>{
     const {error}=validate(req.body);
     if(error)return res.status(400).send(error.details[0].message);
 
@@ -18,7 +19,7 @@ router.post('/',async(req,res)=>{
     res.send(course);
 });
 
-router.put('/:id',async(req,res)=>{
+router.put('/:id', auth, async(req,res)=>{
     const {error}=validate(req.body);//result.error
     if(error){return res.status(400).send(error.details[0].message);}
 
@@ -29,7 +30,7 @@ router.put('/:id',async(req,res)=>{
     res.send(course);
 
 });
-router.get('/:id',async(req,res)=>{
+router.get('/:id', async(req,res)=>{
     const course = await Course.findById(req.params.id)
     if(!course)return res.status(404).send('The course with the given ID not found');
     res.send(course);
@@ -37,7 +38,7 @@ router.get('/:id',async(req,res)=>{
 
 
 
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id',auth, async(req,res)=>{
     const course= await Course.findByIdAndDelete(req.params.id);
     if(!course)return res.status(404).send('The course with the given ID not found');
     res.send(course);
