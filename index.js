@@ -1,15 +1,26 @@
+const Joi = require('joi');
+Joi.objectId=require('joi-objectid')(Joi);
 const mongoose=require('mongoose');
-const debug=require('debug')('app:startup');
+const debug=require('debug')('NodeExpressMongoDbApp');
 const config=require('config');
 const morgan=require('morgan');
 const helmet = require('helmet');
-const auth=require('./middleware/auth');
-const logger=require('./middleware/logger');
-const home=require('./routes/home');
-const courses=require('./routes/courses');
-const students=require('./routes/students');
+const home=require('./controllers/home');
+const auth=require('./controllers/auth');
+const users=require('./controllers/users');
+const courses=require('./controllers/courses');
+const students=require('./controllers/students');
+const genres = require('./controllers/genres');
+const customers = require('./controllers/customers');
+const movies = require('./controllers/movies');
+const rentals = require('./controllers/rentals');
 const express =require('express');
 const app=express();
+
+if(!config.get('jwtPrivateKey')){
+    console.error('FATAL ERROR : jwtPrivateKey is not defined');
+    process.exit(1);
+}
 
 mongoose.connect('mongodb://localhost/vidlydb')
     .then(()=>console.log('connected to MongoDB...'))
@@ -17,29 +28,25 @@ mongoose.connect('mongodb://localhost/vidlydb')
 
 app.set('view engine', 'pug');
 app.set('views', './views');//default
-
-//configuration
-debug(`Application name: ${config.get('name')}`);
-debug(`Mail Server: ${config.get('mail.host')}`);
-debug(`Mail Password: ${config.get('mail.password')}`);
-
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(express.static('public'));
 app.use(helmet());
 app.use('/',home);
-
-
-app.use('/api/courses',courses);
-app.use('/api/students',students);
-
-
 if(app.get('env')==='development'){
     app.use(morgan('tiny'));
     debug('Morgan enabled');
 }
-app.use(logger);
-app.use(auth);
+
+app.use('/api/auth',auth);
+app.use('/api/users', users);
+app.use('/api/courses',courses);
+app.use('/api/students',students);
+app.use('/api/genres', genres);
+app.use('/api/customers', customers);
+app.use('/api/movies', movies);
+app.use('/api/rentals', rentals);
+
 
 
 const port=Number(process.env.PORT||3000);

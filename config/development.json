@@ -1,6 +1,5 @@
 {
     "name":"My Vidly App - Development",
-    "mail":{
-        "host":"dev-mail-server"
-    }
+    "jwtPrivateKey":""
+    
 }
