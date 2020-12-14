@@ -1,4 +1,5 @@
 const auth = require('../middleware/auth');
+const admin = require('../middleware/admin');
 const {Course, validate}=require('../models/course');
 const mongoose=require('mongoose');
 const express =require('express');
@@ -38,7 +39,7 @@ router.get('/:id', async(req,res)=>{
 
 
 
-router.delete('/:id',auth, async(req,res)=>{
+router.delete('/:id',[auth,admin], async(req,res)=>{
     const course= await Course.findByIdAndDelete(req.params.id);
     if(!course)return res.status(404).send('The course with the given ID not found');
     res.send(course);
